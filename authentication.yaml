@@ -1,0 +1,163 @@
+openapi: 3.0.3
+info:
+  title: 新網銀API Token服務
+  description: 提供使用新網銀API服務的Token取得與驗證
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+  - url: /api/v1.0.0/auth
+tags:
+  - description: API Token 服務
+    name: API Token
+paths:
+  /token:
+    get:
+      tags:
+        - API Token
+      description: 取得Token
+      operationId: getToken
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/GetTokenRs"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - basicAuth: []
+  /verify:
+    post:
+      tags:
+        - API Token
+      description: 驗證Token
+      operationId: verifyToken
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: "#/components/schemas/VerifyTokenRq"
+        description: 驗證token 的 request Body
+        required: true
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/VerifyTokenRs"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Basic Base64Encode({應用程式ID} + ":" + {密碼})
+  responses:
+    Unauthorized:
+      description: 驗證失敗
+    InternalServerError:
+      description: 伺服器錯誤
+  schemas:
+    GetTokenRs:
+      description: 取得/更新Token回覆內容
+      properties:
+        ResponseCode:
+          $ref: "#/components/schemas/ResponseCode"
+        ResponseMessage:
+          $ref: "#/components/schemas/ResponseMessage"
+        ResponseDT:
+          $ref: "#/components/schemas/ResponseDT"
+        ResponseData:
+          $ref: "#/components/schemas/GetTokenRsData"
+      required:
+        - ResponseCode
+        - ResponseDT
+        - ResponseMessage
+      title: GetTokenRs
+      type: object
+      example:
+        ResponseCode: S0001
+        ResponseDT: "20240223120000"
+        ResponseData:
+          Token: MRlHeMTq3YilkWibzR4WLygLHSvVS7OwvkB1VLjoJEfTqmvYkoVsazYzXrdJ4wJd
+          TTL: 15768000
+        ResponseMessage: 成功
+    GetTokenRsData:
+      description: 取得/更新Token回應資料
+      properties:
+        Token:
+          $ref: "#/components/schemas/Token"
+        TTL:
+          $ref: "#/components/schemas/TTL"
+      title: GetTokenRsData
+      type: object
+    VerifyTokenRq:
+      description: 驗證Token請求
+      properties:
+        Data:
+          $ref: "#/components/schemas/VerifyTokenRqData"
+      required:
+        - Data
+      title: VerifyTokenRq
+      type: object
+    VerifyTokenRqData:
+      description: 驗證Token請求資料
+      properties:
+        Token:
+          $ref: "#/components/schemas/Token"
+      title: VerifyTokenRqData
+      type: object
+    VerifyTokenRs:
+      description: 驗證Token回覆內容
+      example:
+        ResponseCode: "S0001"
+        ResponseDT: "20230223120000"
+        ResponseData: null
+        ResponseMessage: "成功"
+      properties:
+        ResponseCode:
+          $ref: "#/components/schemas/ResponseCode"
+        ResponseMessage:
+          $ref: "#/components/schemas/ResponseMessage"
+        ResponseDT:
+          $ref: "#/components/schemas/ResponseDT"
+        ResponseData:
+          $ref: "#/components/schemas/VerifyTokenRsData"
+      required:
+        - ResponseCode
+        - ResponseDT
+        - ResponseMessage
+      title: VerifyTokenRs
+      type: object
+    VerifyTokenRsData:
+      description: 驗證Token回應資料
+      title: VerifyTokenRsData
+      type: object
+    ApplicationId:
+      description: 應用程式ID
+      type: string
+    Token:
+      description: 令牌
+      type: string
+    ResponseCode:
+      description: 回傳代碼，成功：S0001，錯誤：E + 4碼數字
+      type: string
+    ResponseMessage:
+      description: 回傳訊息
+      type: string
+    ResponseDT:
+      description: 回傳的Unix Timestamp
+      type: string
+    TTL:
+      description: Token 存留的時間(單位:秒)
+      type: integer
